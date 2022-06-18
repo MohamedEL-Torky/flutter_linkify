@@ -1,25 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:linkify/linkify.dart';
 
 export 'package:linkify/linkify.dart'
-    show
-        LinkifyElement,
-        LinkifyOptions,
-        LinkableElement,
-        TextElement,
-        Linkifier,
-        UrlElement,
-        UrlLinkifier,
-        EmailElement,
-        EmailLinkifier;
+    show LinkifyElement, LinkifyOptions, LinkableElement, TextElement, Linkifier, UrlElement, UrlLinkifier, EmailElement, EmailLinkifier;
 
 /// Callback clicked link
 typedef LinkCallback = void Function(LinkableElement link);
 
 /// Turns URLs into links
-class Linkify extends StatelessWidget {
+class Linkify extends StatefulWidget {
   /// Text to be linkified
   final String text;
 
@@ -73,6 +63,9 @@ class Linkify extends StatelessWidget {
   /// Defines how the paragraph will apply TextStyle.height to the ascent of the first line and descent of the last line.
   final TextHeightBehavior? textHeightBehavior;
 
+  /// The provided widget while the future builder waits parse function to complete bulding the linkifires
+  final Widget? loadingWidget;
+
   const Linkify({
     Key? key,
     required this.text,
@@ -93,48 +86,69 @@ class Linkify extends StatelessWidget {
     this.locale,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.loadingWidget,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final elements = linkify(
-      text,
-      options: options,
-      linkifiers: linkifiers,
-    );
+  State<Linkify> createState() => _LinkifyState();
+}
 
-    return Text.rich(
-      buildTextSpan(
-        elements,
-        style: Theme.of(context).textTheme.bodyText2?.merge(style),
-        onOpen: onOpen,
-        useMouseRegion: true,
-        linkStyle: Theme.of(context)
-            .textTheme
-            .bodyText2
-            ?.merge(style)
-            .copyWith(
-              color: Colors.blueAccent,
-              decoration: TextDecoration.underline,
-            )
-            .merge(linkStyle),
-      ),
-      textAlign: textAlign,
-      textDirection: textDirection,
-      maxLines: maxLines,
-      overflow: overflow,
-      textScaleFactor: textScaleFactor,
-      softWrap: softWrap,
-      strutStyle: strutStyle,
-      locale: locale,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
+class _LinkifyState extends State<Linkify> {
+  late Future<List<LinkifyElement>> linkifiedElements;
+  @override
+  void initState() {
+    super.initState();
+    linkifiedElements = linkify(
+      widget.text,
+      options: widget.options,
+      linkifiers: widget.linkifiers,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: linkifiedElements,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Text.rich(
+            buildTextSpan(
+              snapshot.data as List<LinkifyElement>,
+              style: Theme.of(context).textTheme.bodyText2?.merge(widget.style),
+              onOpen: widget.onOpen,
+              useMouseRegion: true,
+              linkStyle: Theme.of(context)
+                  .textTheme
+                  .bodyText2
+                  ?.merge(widget.style)
+                  .copyWith(
+                    color: Colors.blueAccent,
+                    decoration: TextDecoration.underline,
+                  )
+                  .merge(widget.linkStyle),
+            ),
+            textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
+            maxLines: widget.maxLines,
+            overflow: widget.overflow,
+            textScaleFactor: widget.textScaleFactor,
+            softWrap: widget.softWrap,
+            strutStyle: widget.strutStyle,
+            locale: widget.locale,
+            textWidthBasis: widget.textWidthBasis,
+            textHeightBehavior: widget.textHeightBehavior,
+          );
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return widget.loadingWidget ?? CircularProgressIndicator();
+        }
+        return Container();
+      },
     );
   }
 }
 
 /// Turns URLs into links
-class SelectableLinkify extends StatelessWidget {
+class SelectableLinkify extends StatefulWidget {
   /// Text to be linkified
   final String text;
 
@@ -225,6 +239,9 @@ class SelectableLinkify extends StatelessWidget {
   /// Called when the user changes the selection of text (including the cursor location).
   final SelectionChangedCallback? onSelectionChanged;
 
+  /// The provided widget while the future builder waits parse function to complete bulding the linkifires
+  final Widget? loadingWidget;
+
   const SelectableLinkify({
     Key? key,
     required this.text,
@@ -258,53 +275,74 @@ class SelectableLinkify extends StatelessWidget {
     this.cursorHeight,
     this.selectionControls,
     this.onSelectionChanged,
+    this.loadingWidget,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final elements = linkify(
-      text,
-      options: options,
-      linkifiers: linkifiers,
-    );
+  State<SelectableLinkify> createState() => _SelectableLinkifyState();
+}
 
-    return SelectableText.rich(
-      buildTextSpan(
-        elements,
-        style: Theme.of(context).textTheme.bodyText2?.merge(style),
-        onOpen: onOpen,
-        linkStyle: Theme.of(context)
-            .textTheme
-            .bodyText2
-            ?.merge(style)
-            .copyWith(
-              color: Colors.blueAccent,
-              decoration: TextDecoration.underline,
-            )
-            .merge(linkStyle),
-      ),
-      textAlign: textAlign,
-      textDirection: textDirection,
-      minLines: minLines,
-      maxLines: maxLines,
-      focusNode: focusNode,
-      strutStyle: strutStyle,
-      showCursor: showCursor,
-      textScaleFactor: textScaleFactor,
-      autofocus: autofocus,
-      toolbarOptions: toolbarOptions,
-      cursorWidth: cursorWidth,
-      cursorRadius: cursorRadius,
-      cursorColor: cursorColor,
-      dragStartBehavior: dragStartBehavior,
-      enableInteractiveSelection: enableInteractiveSelection,
-      onTap: onTap,
-      scrollPhysics: scrollPhysics,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
-      cursorHeight: cursorHeight,
-      selectionControls: selectionControls,
-      onSelectionChanged: onSelectionChanged,
+class _SelectableLinkifyState extends State<SelectableLinkify> {
+  late Future<List<LinkifyElement>> linkifiedElements;
+  @override
+  void initState() {
+    super.initState();
+    linkifiedElements = linkify(
+      widget.text,
+      options: widget.options,
+      linkifiers: widget.linkifiers,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: linkifiedElements,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          SelectableText.rich(
+            buildTextSpan(
+              snapshot.data as List<LinkifyElement>,
+              style: Theme.of(context).textTheme.bodyText2?.merge(widget.style),
+              onOpen: widget.onOpen,
+              linkStyle: Theme.of(context)
+                  .textTheme
+                  .bodyText2
+                  ?.merge(widget.style)
+                  .copyWith(
+                    color: Colors.blueAccent,
+                    decoration: TextDecoration.underline,
+                  )
+                  .merge(widget.linkStyle),
+            ),
+            textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
+            minLines: widget.minLines,
+            maxLines: widget.maxLines,
+            focusNode: widget.focusNode,
+            strutStyle: widget.strutStyle,
+            showCursor: widget.showCursor,
+            textScaleFactor: widget.textScaleFactor,
+            autofocus: widget.autofocus,
+            toolbarOptions: widget.toolbarOptions,
+            cursorWidth: widget.cursorWidth,
+            cursorRadius: widget.cursorRadius,
+            cursorColor: widget.cursorColor,
+            dragStartBehavior: widget.dragStartBehavior,
+            enableInteractiveSelection: widget.enableInteractiveSelection,
+            onTap: widget.onTap,
+            scrollPhysics: widget.scrollPhysics,
+            textWidthBasis: widget.textWidthBasis,
+            textHeightBehavior: widget.textHeightBehavior,
+            cursorHeight: widget.cursorHeight,
+            selectionControls: widget.selectionControls,
+            onSelectionChanged: widget.onSelectionChanged,
+          );
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return widget.loadingWidget ?? CircularProgressIndicator();
+        }
+        return Container();
+      },
     );
   }
 }

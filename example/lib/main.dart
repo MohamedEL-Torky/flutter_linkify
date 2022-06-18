@@ -24,6 +24,8 @@ class LinkifyExample extends StatelessWidget {
                 onOpen: _onOpen,
                 textScaleFactor: 2,
                 text: "Made by https://cretezy.com\n\nMail: example@gmail.com",
+                linkifiers: [],
+                loadingWidget: CircularProgressIndicator(),
               ),
             ),
             Center(
@@ -31,6 +33,7 @@ class LinkifyExample extends StatelessWidget {
                 onOpen: _onOpen,
                 textScaleFactor: 4,
                 text: "Made by https://cretezy.com\n\nMail: example@gmail.com",
+                loadingWidget: CircularProgressIndicator(),
               ),
             ),
           ],
@@ -40,8 +43,8 @@ class LinkifyExample extends StatelessWidget {
   }
 
   Future<void> _onOpen(LinkableElement link) async {
-    if (await canLaunch(link.url)) {
-      await launch(link.url);
+    if (await canLaunchUrl(Uri.parse(link.url))) {
+      await launchUrl(Uri.parse(link.url));
     } else {
       throw 'Could not launch $link';
     }
