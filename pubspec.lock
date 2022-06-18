@@ -156,7 +156,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8125b1281dbf58f7eed0fd231dfe1e1cb8818ea9"
+      resolved-ref: "1130733274df47bf0e556b8271481945df46111f"
       url: "https://github.com/MohamedEL-Torky/linkify"
     source: git
     version: "4.1.0"

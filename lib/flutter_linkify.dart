@@ -15,7 +15,8 @@ export 'package:linkify/linkify.dart'
         UrlLinkifier,
         EmailElement,
         EmailLinkifier,
-        GeneralLinkifier,
+        UserMentionLinkifier,
+        HashTagLinkifier,
         UserMentionElement,
         HashTagElement;
 
