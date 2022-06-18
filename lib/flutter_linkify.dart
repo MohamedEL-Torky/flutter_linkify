@@ -3,7 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:linkify/linkify.dart';
 
 export 'package:linkify/linkify.dart'
-    show LinkifyElement, LinkifyOptions, LinkableElement, TextElement, Linkifier, UrlElement, UrlLinkifier, EmailElement, EmailLinkifier;
+    show
+        LinkifyElement,
+        LinkifyOptions,
+        LinkableElement,
+        TextElement,
+        Linkifier,
+        UrlElement,
+        UrlLinkifier,
+        EmailElement,
+        EmailLinkifier,
+        GeneralLinkifier;
 
 /// Callback clicked link
 typedef LinkCallback = void Function(LinkableElement link);
