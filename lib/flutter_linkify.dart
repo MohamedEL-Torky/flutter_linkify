@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:linkify/linkify.dart';
@@ -312,7 +314,7 @@ class _SelectableLinkifyState extends State<SelectableLinkify> {
       future: linkifiedElements,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          SelectableText.rich(
+          return SelectableText.rich(
             buildTextSpan(
               snapshot.data as List<LinkifyElement>,
               style: Theme.of(context).textTheme.bodyText2?.merge(widget.style),
